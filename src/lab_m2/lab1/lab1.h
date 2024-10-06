@@ -30,7 +30,11 @@ namespace m2
      private:
         unsigned int nrInstances;
         unsigned int maxInstances;
-        float shrink;
+        unsigned int minInstances;
 
+        float scale_coeff;
+        float min_scale_coeff;
+        float max_scale_coeff;
+        float step_scale_coeff;
     };
 }   // namespace m2

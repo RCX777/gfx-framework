@@ -1,17 +1,29 @@
 #version 330
 
+#define TRIANGLE_STRIP 1
+
+#define PI 3.1415926535897932384626433832795
+
+
 // Input and output topologies
-// TODO(student): First, generate a curve (via line strip),
+// student: First, generate a curve (via line strip),
 // then a rotation/translation surface (via triangle strip)
 layout(lines) in;
+#if TRIANGLE_STRIP
+layout(triangle_strip, max_vertices = 256) out;
+#else
 layout(line_strip, max_vertices = 256) out;
+#endif
 
 // Uniform properties
 uniform mat4 View;
 uniform mat4 Projection;
 uniform vec3 control_p0, control_p1, control_p2, control_p3;
 uniform int no_of_instances;
-// TODO(student): Declare any other uniforms here
+// student: Declare any other uniforms here
+uniform int no_of_generated_points;
+uniform float max_translate, max_rotate;
+uniform int surface_type;
 
 // Input
 in int instance[2];
@@ -50,7 +62,7 @@ vec3 bezier(float t)
 // Hermite spline. Hint: you can repurpose two of the control points. For a
 // visual example, see [1]. For an interactive Javascript example with the
 // exact points in this code, see [2].
-// 
+//
 // Unlike the Javascript function, you MUST NOT call the Bezier function.
 // There is another way to draw a Hermite spline, all you need is to find
 // the formula.
@@ -65,17 +77,45 @@ void main()
 
     // You can change the value of SURFACE_TYPE to experiment
     // with different transformation types.
-    const int SURFACE_TYPE = SURFACE_TYPE_ROTATION;
 
     if (instance[0] < no_of_instances)
     {
-        // TODO(student): Rather than emitting vertices for the control
+        // student: Rather than emitting vertices for the control
         // points, you must emit vertices that approximate the curve itself.
-        gl_Position = Projection * View * vec4(control_p0, 1);   EmitVertex();
-        gl_Position = Projection * View * vec4(control_p1, 1);   EmitVertex();
-        gl_Position = Projection * View * vec4(control_p2, 1);   EmitVertex();
-        gl_Position = Projection * View * vec4(control_p3, 1);   EmitVertex();
+        for (int i = 0; i < no_of_generated_points; i++)
+        {
+            if (surface_type == SURFACE_TYPE_TRANSLATION)
+            {
+                gl_Position = Projection * View
+                    * vec4(translateX(bezier(float(i) / (no_of_generated_points - 1)),
+                                      instance[0]),
+                           1);
+                EmitVertex();
+#if TRIANGLE_STRIP
+                gl_Position = Projection * View
+                    * vec4(translateX(bezier(float(i) / (no_of_generated_points - 1)),
+                                      instance[0] + 1),
+                           1);
+                EmitVertex();
+#endif
+            }
+            else if (surface_type == SURFACE_TYPE_ROTATION)
+            {
+                gl_Position = Projection * View
+                    * vec4(rotateY(bezier(float(i) / (no_of_generated_points - 1)),
+                                   2 * PI * float(instance[0]) / no_of_instances),
+                           1);
+                EmitVertex();
+#if TRIANGLE_STRIP
+                gl_Position = Projection * View
+                    * vec4(rotateY(bezier(float(i) / (no_of_generated_points - 1)),
+                                   2 * PI * float(instance[0] + 1) / no_of_instances),
+                           1);
+                EmitVertex();
+#endif
+            }
+        }
         EndPrimitive();
-
     }
 }
+

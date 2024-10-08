@@ -30,6 +30,7 @@ void Lab2::Init()
     camera->Update();
 
     ToggleGroundPlane();
+    surface_type = 0;
 
     // Create a shader program for surface generation
     {
@@ -68,7 +69,7 @@ void Lab2::Init()
 
         meshes["surface"] = new Mesh("generated initial surface points");
         meshes["surface"]->InitFromData(vertices, indices);
-        meshes["surface"]->SetDrawMode(GL_LINES);
+        meshes["surface"]->SetDrawMode(GL_LINE_STRIP);
     }
 }
 
@@ -133,6 +134,10 @@ void Lab2::Update(float deltaTimeSeconds)
     // creating the translation/rotation surfaces (max_translate, max_rotate).
     // NOTE: If you're feeling lost and need a frame of reference while doing
     // this lab, go to `FrameEnd()` and activate `DrawCoordinateSystem()`.
+    glUniform1i(glGetUniformLocation(shader->program, "no_of_generated_points"), no_of_generated_points);
+    glUniform1f(glGetUniformLocation(shader->program, "max_translate"), max_translate);
+    glUniform1f(glGetUniformLocation(shader->program, "max_rotate"), max_rotate);
+    glUniform1i(glGetUniformLocation(shader->program, "surface_type"), surface_type);
 
     Mesh* mesh = meshes["surface"];
 
@@ -143,7 +148,7 @@ void Lab2::Update(float deltaTimeSeconds)
 
 void Lab2::FrameEnd()
 {
-#if 0
+#if 1
     DrawCoordinateSystem();
 #endif
 }
@@ -199,10 +204,30 @@ void Lab2::OnInputUpdate(float deltaTime, int mods)
 
 void Lab2::OnKeyPress(int key, int mods)
 {
-    // TODO(student): Use keys to change the number of instances and the
+    // student: Use keys to change the number of instances and the
     // number of generated points. Avoid the camera keys, and avoid the
     // the keys from `OnInputUpdate`.
+    if (key == GLFW_KEY_H)
+    {
+        no_of_instances--;
+    }
+    if (key == GLFW_KEY_L)
+    {
+        no_of_instances++;
+    }
+    if (key == GLFW_KEY_J)
+    {
+        no_of_generated_points--;
+    }
+    if (key == GLFW_KEY_K)
+    {
+        no_of_generated_points++;
+    }
 
+    if (key == GLFW_KEY_T)
+    {
+        surface_type = (surface_type + 1) % 2;
+    }
 }
 
 

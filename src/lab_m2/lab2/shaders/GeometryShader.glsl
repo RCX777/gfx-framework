@@ -88,13 +88,13 @@ void main()
             {
                 gl_Position = Projection * View
                     * vec4(translateX(bezier(float(i) / (no_of_generated_points - 1)),
-                                      instance[0]),
+                                      2 * PI * float(instance[0]) / no_of_instances),
                            1);
                 EmitVertex();
 #if TRIANGLE_STRIP
                 gl_Position = Projection * View
                     * vec4(translateX(bezier(float(i) / (no_of_generated_points - 1)),
-                                      instance[0] + 1),
+                                      2 * PI * float(instance[0] + 1) / no_of_instances),
                            1);
                 EmitVertex();
 #endif
